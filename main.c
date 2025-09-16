@@ -21,7 +21,7 @@ int main() {
   bind(server_fd, (struct sockaddr*)&address, sizeof(address));
 
   listen(server_fd, 3);
-  printf("Server listening on PORT%d\n", PORT);
+  printf("Server listening on PORT: %d\n", PORT);
 
   while(1) {
     client_fd = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
@@ -31,8 +31,8 @@ int main() {
     char *response = 
             "HTTP/1.1 200 OK\n"
             "Content-Type: text/plain\n"
-            "Content-Length: 13\n\n"
-            "Hello, world!";
+            "Content-Length: 30\n\n"
+            "A monk in the cloud";
     write(client_fd, response, strlen(response));
     close(client_fd);
   }
