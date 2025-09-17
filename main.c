@@ -36,4 +36,5 @@ int main() {
     write(client_fd, response, strlen(response));
     close(client_fd);
   }
+  return 0;
 }
