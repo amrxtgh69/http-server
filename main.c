@@ -8,7 +8,7 @@
 
 #define PORT 8080
 
-void send_file(int client_fd, const char *filename) {
+void send_file(int client_fd, const char *filename, const char *content_type) {
   FILE *file = fopen(filename, "r");
   if (file == NULL) {
     char *not_found = 
@@ -30,11 +30,13 @@ void send_file(int client_fd, const char *filename) {
   //response header 
   char header[256];
   snprintf(header, sizeof(header),
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: %ld\r\n\r\n", filesize);
+             "HTTP/1.1 200 OK\r\n"
+             "Content-Type: %s\r\n"
+             "Content-Length: %ld\r\n"
+             "Connection: close\r\n\r\n",
+             content_type, filesize);
   write(client_fd, header, strlen(header));
-  write(client_fd, file_content, sizeof(file_content));
+  write(client_fd, file_content, filesize);
 
   free(file_content);
 }
@@ -62,9 +64,13 @@ int main() {
     buffer[valread] = '\0';
     printf("Request:\n%s\n", buffer);
 
-    if (strncmp(buffer, "GET /index ", 11) == 0) {
-      send_file(client_fd, "index.html");
-    } else {
+    if (strncmp(buffer, "GET /index", 10) == 0 || strncmp(buffer, "GET /index.html", 15) == 0) {
+      send_file(client_fd, "index.html", "text/html");
+    }
+    else if (strncmp(buffer, "GET /favicon.ico", 16) == 0) {
+      send_file(client_fd, "favicon.ico", "image/x-icon");
+    }
+    else {
       char *response = 
          "HTTP/1.1 404 Not Found\r\n"
          "Content-Type: text/plain\r\n"
